@@ -12,7 +12,7 @@ config = configparser.ConfigParser()
 config_path = os.path.join(os.path.dirname(__file__), "config.ini")
 config.read(os.path.abspath(config_path))
 
-API_KEY = config["API"]["KEY"]
+API_KEY = st.secrets["API_KEY"]
 
 INCOME_SEREIS_ID = 'PI'
 COMBINED_GAS_AND_UTIL = 'DNRGRC1M027SBEA'
