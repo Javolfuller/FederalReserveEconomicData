@@ -120,7 +120,6 @@ def get_request (end_point, end_point_id, observation_start=None, observation_en
 
             return meta_df, observation_df
 
-@st.cache_data
 def get_single_year_metrics (df):
 
     # summation
@@ -156,6 +155,49 @@ def get_single_year_metrics (df):
     }
 
     return metrics
+
+def get_multi_year_metrics (df):
+
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.set_index('date')
+
+    # Calculate growth
+    income_spend_avg_growth = df[df['series'] == INCOME_SEREIS_ID]['converted_value'].resample('YE').sum().pct_change().mean() * 100
+    housing_spend_avg_growth = df[df['series'] == "HOUSING"]['converted_value'].resample('YE').sum().pct_change().mean() * 100
+    util_spend_avg_growth = df[df['series'] == UTILITY_SEREIES_ID]['converted_value'].resample('YE').sum().pct_change().mean() * 100
+    health_spend_avg_growth = df[df['series'] == HEALTH_SERIES_ID]['converted_value'].resample('YE').sum().pct_change().mean() * 100
+    gas_spend_avg_growth = df[df['series'] == GAS_SERIES_ID]['converted_value'].resample('YE').sum().pct_change().mean() * 100
+    grocery_spend_avg_growth = df[df['series'] == GROCERIES_SERIES_ID]['converted_value'].resample('YE').sum().pct_change().mean() * 100
+    travel_spend_spend_avg_growth = df[df['series'] == TRAVEL_SERIES_ID]['converted_value'].resample('YE').sum().pct_change().mean() * 100
+
+    # Calculate Average
+    income_spend_avg = df[df['series'] == INCOME_SEREIS_ID]['converted_value'].mean()
+    housing_spend_avg = df[df['series'] == "HOUSING"]['converted_value'].mean()
+    util_spend_avg = df[df['series'] == UTILITY_SEREIES_ID]['converted_value'].mean()
+    health_spend_avg = df[df['series'] == HEALTH_SERIES_ID]['converted_value'].mean()
+    gas_spend_avg = df[df['series'] == GAS_SERIES_ID]['converted_value'].mean()
+    grocery_spend_avg = df[df['series'] == GROCERIES_SERIES_ID]['converted_value'].mean()
+    travel_spend_spend_avg = df[df['series'] == TRAVEL_SERIES_ID]['converted_value'].mean()
+
+    metrics = {
+        'income_spend_avg_growth': income_spend_avg_growth,
+        'housing_spend_avg_growth': housing_spend_avg_growth,
+        'util_spend_avg_growth': util_spend_avg_growth,
+        'health_spend_avg_growth': health_spend_avg_growth,
+        'gas_spend_avg_growth': gas_spend_avg_growth,
+        'grocery_spend_avg_growth': grocery_spend_avg_growth,
+        'travel_spend_spend_avg_growth': travel_spend_spend_avg_growth,
+        'income_spend_avg': income_spend_avg,
+        'housing_spend_avg': housing_spend_avg,
+        'util_spend_avg': util_spend_avg,
+        'health_spend_avg': health_spend_avg,
+        'gas_spend_avg': gas_spend_avg,
+        'grocery_spend_avg': grocery_spend_avg,
+        'travel_spend_spend_avg': travel_spend_spend_avg
+    }
+
+    return metrics
+
 
 @st.cache_data
 def collect_single_year_data():

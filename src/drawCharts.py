@@ -89,50 +89,99 @@ def draw_donut_chart(df):
 
     st.plotly_chart(fig, use_container_width=True)
 
-def draw_ticker_card(label, pct_change, absolute_val_str):
-    """Generates a styled financial terminal widget for YoY metrics."""
-    if pct_change >= 0:
-        color = "#00CC96"       # Emerald green
-        bg_color = "#0E2F26"    # Forest green sheen
-        arrow = "▲"
-        sign = "+"
-    else:
-        color = "#FF3E3E"       # Crimson red
-        bg_color = "#351212"    # Maroon sheen
-        arrow = "▼"
-        sign = ""               # Handled natively by negative numbers
+def draw_ticker_card(time_frame, label: str, absolute_val_str: str, pct_change: float,):
+    # 1. Handle background colors and icons for the trend badge
+        badge_html = ""
+        if pct_change is not None:
+            if pct_change >= 0:
+                text_color = "#1E7E34"
+                bg_color = "#E6F4EA"
+                icon = "↑"
+                sign = "+"
+            else:
+                text_color = "#D93025"       # Deep crisp red text
+                bg_color = "#FCE8E6"         # Soft light red pill background
+                icon = "↓"
+                sign = ""                    # Negative sign is automatically provided
 
-    ticker_html = f"""
-    <div style="
-        background-color: #111217;
-        border: 1px solid #262730;
-        border-radius: 8px;
-        padding: 15px;
-        text-align: left;
-        font-family: sans-serif;">
-        <div style="font-size: 12px; color: #808495; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
-            {label}
-        </div>
-        <div style="display: flex; align-items: baseline; gap: 10px;">
-            <span style="font-size: 24px; font-weight: 700; color: #FFFFFF;">{absolute_val_str}</span>
-            <span style="
-                background-color: {bg_color};
-                color: {color};
-                padding: 2px 8px;
-                border-radius: 4px;
-                font-size: 14px;
-                font-weight: 600;
-                display: inline-flex;
-                align-items: center;
-                gap: 3px;">
-                {arrow} {sign}{pct_change:.1%}
-            </span>
-        </div>
-    </div>
-    """
-    return st.html(ticker_html)
+            badge_html = f"""
+            <div style="display: inline-flex; align-items: center; justify-content: center; margin-top: 10px;">
+                <span style="
+                    background-color: {bg_color};
+                    color: {text_color};
+                    padding: 4px 10px;
+                    border-radius: 20px;
+                    font-size: 13px;
+                    font-weight: 600;
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    line-height: 1;">
+                    <span>{icon}</span> <span>{sign}{pct_change:.1f}%</span>
+                </span>
+            </div>
+            """
 
-def draw_bar_chart(df):
+        # 2. Complete structural card wrapper
+        card_html = f"""
+        <div style="
+            padding: 20px;
+            text-align: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;">
+
+            <div style="font-size: 13px; color: #808495; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; font-weight: 500;">
+                {label} <span style="color: #525866; font-size: 11px;">({time_frame})</span>
+            </div>
+
+            <div style="font-size: 28px; font-weight: 700; color: #FFFFFF; line-height: 1.2;">
+               $ {absolute_val_str:.2f} B
+            </div>
+
+            {badge_html}
+        </div>
+        """
+        return st.html(card_html)
+
+
+def draw_spend_total_spend_over_time (df):
+
+    essential_df = df[df.series.isin([INCOME_SEREIS_ID, TRAVEL_SERIES_ID])].copy()
+    income_df = df[df['series'] == INCOME_SEREIS_ID].copy()
+
+    grouped_ess_df = essential_df.groupby('year')['converted_value'].sum().reset_index()
+    grouped_inc_df = income_df.groupby('year')['converted_value'].sum().reset_index()
+    grouped_ess_df['Category'] = 'Necessities'
+    grouped_inc_df['Category'] = 'Income'
+    chart_df = pd.concat([grouped_ess_df, grouped_inc_df])
+    chart_df = chart_df.rename(columns={'converted_value': 'Amount'})
+
+    # Draw Chart
+    chart = alt.Chart(chart_df).mark_line(point=False).encode(
+        x=alt.X('year', title='Year', axis=alt.Axis(format='d')),
+        y=alt.Y('Amount:Q', title='Amount ($ Billions)', axis=alt.Axis(format='.2f')),
+        color=alt.Color('Category:N',
+            legend=alt.Legend(
+                            title=None,
+                            orient='bottom',
+                            direction='horizontal'),
+            scale=alt.Scale(
+                            domain=list(['Necessities', 'Income']),
+                            range=list(['#D0021B', '#4A90E2'])
+                        )),
+        tooltip=[
+                alt.Tooltip('year:O', title='Year'),
+                alt.Tooltip('Amount:Q', title='Total Spend', format='$.2f')
+            ]).properties(title="Total Essential Spend Trend")
+
+    st.altair_chart(chart, use_container_width=True)
+
+
+def draw_bar_chart_monthly(df):
 
     chart_df = df[~df['series'].isin([INCOME_SEREIS_ID])].rename(columns={'converted_value': 'Amount'}).copy()
 
@@ -159,9 +208,42 @@ def draw_bar_chart(df):
                 alt.Tooltip('Amount:Q', title='Amount ($ Billions)', format='.1f')
             ]
     ).properties(
-        title="Monthly Spend Breakdown"
+        title="Monthly Spend Breakdown",
+        width='container',
+        height=400
     )
     st.altair_chart(chart, use_container_width=True)
+
+
+def draw_bar_chart_yearly(df):
+
+    chart_df = df[~df['series'].isin([INCOME_SEREIS_ID])].rename(columns={'converted_value': 'Amount'}).copy()
+    grouped = chart_df.groupby(['year', 'title'])['Amount'].sum().reset_index()
+    # year_order = grouped['year'].sort_values().unique().tolist()
+
+    # Convert title
+    grouped['Category'] = grouped['title'].apply(lambda x: TITLE_NAME_HOVER[x])
+
+    chart = alt.Chart(grouped).mark_bar().encode(
+        x=alt.X('Amount:Q', title='Amount ($ Billions)'),
+        y=alt.Y('year:O', title='Year'),
+        color=alt.Color('Category:N', legend=None,
+            scale=alt.Scale(
+                            domain=list(MASTER_PALETTE.keys()),
+                            range=list(MASTER_PALETTE.values())
+                        )),
+        tooltip=[
+                alt.Tooltip('Category:N', title='title'),
+                alt.Tooltip('year:O', title='Year', format='d'),
+                alt.Tooltip('Amount:Q', title='Amount ($ Billions)', format='.1f')
+            ]
+    ).properties(
+        title="Yearly Spend Breakdown",
+        width='container',
+        height=400
+    )
+    st.altair_chart(chart, use_container_width=True)
+
 
 def draw_ToT_line_chart(df, pill_filter):
 
@@ -205,3 +287,95 @@ def draw_ToT_line_chart(df, pill_filter):
     ).properties(title="Monthly Inflation Rate")
 
     st.altair_chart(chart, use_container_width=True)
+
+
+def draw_category_spend_trend(df, pill_filter):
+
+    pills = {
+        'Income': INCOME_SEREIS_ID,
+        'Housing': 'HOUSING',
+        'Utilities': UTILITY_SEREIES_ID,
+        'Health Care': HEALTH_SERIES_ID,
+        'Gas': GAS_SERIES_ID,
+        'Groceries': GROCERIES_SERIES_ID,
+        'Vaction': TRAVEL_SERIES_ID
+        }
+
+    selected_pills = [pills[p] for p in pill_filter if p in pills.keys()]
+    selected_pills.append('PI') # Always add income back for line hraph
+
+    # calculate yearly YoY change
+    grouped = df.groupby(['title', 'series', 'year'])['converted_value'].sum().reset_index()
+    grouped = grouped.sort_values(['series', 'year']).reset_index(drop=True)
+    grouped['YoY Rate'] = grouped.groupby('series')['converted_value'].pct_change()
+
+    chart_df = grouped[grouped.series.isin(selected_pills)]
+    chart_df = chart_df[chart_df['YoY Rate'].notna()]
+
+    # Convert title
+    chart_df['Category'] = chart_df['title'].apply(lambda x: TITLE_NAME_HOVER[x])
+
+    chart = alt.Chart(chart_df).mark_line().encode(
+        x=alt.X('year', title=None, axis=alt.Axis(format='d')),
+        y=alt.Y('YoY Rate:Q', axis=alt.Axis(format='%')),
+        color=alt.Color('Category', legend=None,
+            scale=alt.Scale(
+                            domain=list(MASTER_PALETTE.keys()),
+                            range=list(MASTER_PALETTE.values())
+                        )),
+        tooltip=[
+                alt.Tooltip('Category:N', title='title'),
+                alt.Tooltip('YoY Rate:Q', title='Rate', format='.1%')
+            ],
+        # Reduce Opacity
+        opacity=alt.condition(
+                "datum.Category == 'Income'",
+                alt.value(1.0),
+                alt.value(0.30))
+    ).properties(title="Yearly Inflation Rate")
+
+    st.altair_chart(chart, use_container_width=True)
+
+
+# def draw_category_spend_trend(df, pill_filter):
+
+#     pills = {
+#         'Income': INCOME_SEREIS_ID,
+#         'Housing': 'HOUSING',
+#         'Utilities': UTILITY_SEREIES_ID,
+#         'Health Care': HEALTH_SERIES_ID,
+#         'Gas': GAS_SERIES_ID,
+#         'Groceries': GROCERIES_SERIES_ID,
+#         'Vaction': TRAVEL_SERIES_ID
+#         }
+
+#     selected_pills = [pills[p] for p in pill_filter if p in pills.keys()]
+#     selected_pills.append('PI') # Always add income back for line hraph
+
+#     chart_df = df.rename(columns={'converted_value': 'Amount'}).copy()
+#     chart_df = chart_df[chart_df.series.isin(selected_pills)]
+
+#     # Convert title
+#     chart_df['Category'] = chart_df['title'].apply(lambda x: TITLE_NAME_HOVER[x])
+#     chart_df = chart_df.groupby(['Category', 'year'])['Amount'].sum().reset_index()
+
+#     chart = alt.Chart(chart_df).mark_line().encode(
+#         x=alt.X('year', title=None, axis=alt.Axis(format='d')),
+#         y=alt.Y('Amount:Q'),
+#         color=alt.Color('Category', legend=None,
+#             scale=alt.Scale(
+#                             domain=list(MASTER_PALETTE.keys()),
+#                             range=list(MASTER_PALETTE.values())
+#                         )),
+#         tooltip=[
+#                 alt.Tooltip('Category:N', title='title'),
+#                 alt.Tooltip('Amount:Q', title='Amount', format='.2')
+#             ],
+#         # Reduce Opacity
+#         opacity=alt.condition(
+#                 "datum.Category == 'Income'",
+#                 alt.value(1.0),
+#                 alt.value(0.30))
+#     ).properties(title="Spend Trend")
+
+#     st.altair_chart(chart, use_container_width=True)
