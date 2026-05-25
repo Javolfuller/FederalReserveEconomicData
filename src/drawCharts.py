@@ -89,7 +89,7 @@ def draw_donut_chart(df):
 
     st.plotly_chart(fig, use_container_width=True)
 
-def draw_ticker_card(time_frame, prefix_label_format, postfix_label_format, label, absolute_val_str, pct_change):
+def draw_ticker_card(time_frame, prefix_val_format, postfix_val_format, label, sub_label, absolute_val_str, pct_change):
     # 1. Handle background colors and icons for the trend badge
         badge_html = ""
         if pct_change is not None:
@@ -120,6 +120,9 @@ def draw_ticker_card(time_frame, prefix_label_format, postfix_label_format, labe
                     <span>{icon}</span> <span>{sign}{pct_change:.2f}%</span>
                 </span>
             </div>
+            <div>
+                <span style="color: #525866; font-size: 14px;">{sub_label}</span>
+            </div>
             """
 
         # 2. Complete structural card wrapper
@@ -139,7 +142,7 @@ def draw_ticker_card(time_frame, prefix_label_format, postfix_label_format, labe
             </div>
 
             <div style="font-size: 28px; font-weight: 700; color: #FFFFFF; line-height: 1.2;">
-               {prefix_label_format} {absolute_val_str} {postfix_label_format}
+               {prefix_val_format} {absolute_val_str} {postfix_val_format}
             </div>
 
             {badge_html}

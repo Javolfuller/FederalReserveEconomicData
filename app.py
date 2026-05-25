@@ -73,18 +73,20 @@ with col1:
             draw_ticker_card(
                     time_frame='Year',
                     label="Necessity Usage",
+                    sub_label="Average MoM Change",
                     pct_change=metrics['neccessities_pct_avg_growth'],
-                    prefix_label_format=' ',
-                    postfix_label_format=' %',
+                    prefix_val_format=' ',
+                    postfix_val_format=' %',
                     absolute_val_str=f"{metrics['neccessities_pct']:.0f}"
                 )
         else:
             draw_ticker_card(
                     time_frame='Year',
                     label="Average Housing Spend Growth",
+                    sub_label="Average YoY Change",
                     pct_change=metrics['housing_spend_avg_growth'],
-                    prefix_label_format='$ ',
-                    postfix_label_format=' B',
+                    prefix_val_format='$ ',
+                    postfix_val_format=' B',
                     absolute_val_str=f"{metrics['housing_spend_avg_growth']:.2f}"
                 )
 
@@ -95,18 +97,20 @@ with col2:
             draw_ticker_card(
                     time_frame='Year',
                     label="Left Over Income Percentage",
+                    sub_label="Average MoM Change",
                     pct_change=metrics['post_necessities_pct_avg_growth'],
-                    prefix_label_format=' ',
-                    postfix_label_format=' %',
+                    prefix_val_format=' ',
+                    postfix_val_format=' %',
                     absolute_val_str=f"{metrics['post_necessities_pct']:.0f}"
                 )
         else:
             draw_ticker_card(
                     time_frame='Year',
                     label="Average Utility Spend Growth",
+                    sub_label="Average YoY Change",
                     pct_change=metrics['util_spend_avg_growth'],
-                    prefix_label_format='$ ',
-                    postfix_label_format=' B',
+                    prefix_val_format='$ ',
+                    postfix_val_format=' B',
                     absolute_val_str=f"{metrics['util_spend_avg']:.2f}"
                 )
 
@@ -117,18 +121,20 @@ with col3:
             draw_ticker_card(
                     time_frame='Year',
                     label="Income to Necessities Ratio",
+                    sub_label="Average MoM Change",
                     pct_change=metrics['income_to_necessities_ratio_avg_growth'],
-                    prefix_label_format='',
-                    postfix_label_format='',
+                    prefix_val_format='',
+                    postfix_val_format='',
                     absolute_val_str=f"{metrics['income_to_necessities_ratio']:.2f}"
                 )
         else:
             draw_ticker_card(
                     time_frame='Year',
                     label="Average Health-Care Spend Growth",
+                    sub_label="Average YoY Change",
                     pct_change=metrics['health_spend_avg_growth'],
-                    prefix_label_format='$ ',
-                    postfix_label_format=' B',
+                    prefix_val_format='$ ',
+                    postfix_val_format=' B',
                     absolute_val_str=f"{metrics['health_spend_avg']:.2f}"
                 )
 
@@ -139,18 +145,20 @@ with col4:
             draw_ticker_card(
                     time_frame='Year',
                     label="Monthly Average Health Spend",
+                    sub_label="Average MoM Change",
                     pct_change=metrics['health_spend_avg_growth'],
-                    prefix_label_format='$ ',
-                    postfix_label_format=' B',
+                    prefix_val_format='$ ',
+                    postfix_val_format=' B',
                     absolute_val_str=f"{metrics['average_monthly_health_spend']:.2f}"
                 )
         else:
             draw_ticker_card(
                     time_frame='Year',
                     label="Average Feul Spend Growth",
+                    sub_label="Average YoY Change",
                     pct_change=metrics['gas_spend_avg_growth'],
-                    prefix_label_format='$ ',
-                    postfix_label_format=' B',
+                    prefix_val_format='$ ',
+                    postfix_val_format=' B',
                     absolute_val_str=f"{metrics['gas_spend_avg']:.2f}"
                 )
 
@@ -161,18 +169,20 @@ with col5:
             draw_ticker_card(
                     time_frame='Year',
                     label="Monthly Average gas Spend",
+                    sub_label="Average MoM Change",
                     pct_change=metrics['gas_spend_avg_growth'],
-                    prefix_label_format='$ ',
-                    postfix_label_format=' B',
+                    prefix_val_format='$ ',
+                    postfix_val_format=' B',
                     absolute_val_str=f"{metrics['average_monthly_gas_spend']:.2f}"
                 )
         else:
             draw_ticker_card(
                     time_frame='Year',
                     label="Average Grocery Spend Growth",
+                    sub_label="Average YoY Change",
                     pct_change=metrics['grocery_spend_avg_growth'],
-                    prefix_label_format='$ ',
-                    postfix_label_format=' B',
+                    prefix_val_format='$ ',
+                    postfix_val_format=' B',
                     absolute_val_str=f"{metrics['grocery_spend_avg']:.2f}"
                 )
 
@@ -183,18 +193,20 @@ with col6:
             draw_ticker_card(
                     time_frame='Year',
                     label="Foreign Travel Spend Growth",
+                    sub_label="Average MoM Change",
                     pct_change=metrics['travel_spend_spend_avg_growth'],
-                    prefix_label_format=' ',
-                    postfix_label_format=' %',
+                    prefix_val_format=' ',
+                    postfix_val_format=' %',
                     absolute_val_str=f"{metrics['travel_yoy_change']:.0f}"
                 )
         else:
             draw_ticker_card(
                     time_frame='Year',
                     label="Average Foreign Travel Spend Growth",
+                    sub_label="Average YoY Change",
                     pct_change=metrics['travel_spend_spend_avg_growth'],
-                    prefix_label_format='$ ',
-                    postfix_label_format=' B',
+                    prefix_val_format='$ ',
+                    postfix_val_format=' B',
                     absolute_val_str=f"{metrics['travel_spend_spend_avg']:.2f}"
                 )
 
