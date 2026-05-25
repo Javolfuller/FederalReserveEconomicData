@@ -122,36 +122,53 @@ def get_request (end_point, end_point_id, observation_start=None, observation_en
 
 def get_single_year_metrics (df):
 
-    # summation
-    income = df[df['series'] == INCOME_SEREIS_ID]['converted_value'].sum()
-    housing = df[df['series'] == 'HOUSING']['converted_value'].sum()
-    util = df[df['series'] == UTILITY_SEREIES_ID]['converted_value'].sum()
-    health = df[df['series'] == HEALTH_SERIES_ID]['converted_value'].sum()
-    gas = df[df['series'] == GAS_SERIES_ID]['converted_value'].sum()
-    groceries = df[df['series'] == GROCERIES_SERIES_ID]['converted_value'].sum()
-    raw_travel = df[df['series'] == TRAVEL_SERIES_ID]['converted_value'].sum()
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.sort_values('date').set_index('date').copy()
+
+    # metric Series
+    income = df[df['series'] == INCOME_SEREIS_ID]['converted_value']
+    housing = df[df['series'] == 'HOUSING']['converted_value']
+    util = df[df['series'] == UTILITY_SEREIES_ID]['converted_value']
+    health = df[df['series'] == HEALTH_SERIES_ID]['converted_value']
+    gas = df[df['series'] == GAS_SERIES_ID]['converted_value']
+    groceries = df[df['series'] == GROCERIES_SERIES_ID]['converted_value']
+    raw_travel = df[df['series'] == TRAVEL_SERIES_ID]['converted_value']
     travel_yoy_change = df[df['series'] == TRAVEL_SERIES_ID]['pct_change'].iloc[0] * 100
 
     # Compute metrics
-    neccessities_pct = ((housing + util + health + gas + groceries) / income) * 100
-    left_over_income = income - (housing + util + health + gas + groceries)
-    post_necessities_pct = (left_over_income / income) * 100
-    income_to_necessities_ratio = income / (housing + util + health + gas + groceries)
-    total_months = df[df['series'] == INCOME_SEREIS_ID]['date'].nunique() or 12  #df['date'].nunique() or 12 <-- Remove this account for annual travel data
-    travel = (raw_travel / 12) * total_months
-    avg_health_spend = health / total_months
-    avg_gas_spend = gas / total_months
+    neccessities_pct = ((housing + util + health + gas + groceries).sum() / income.sum()) * 100 #######
+    left_over_income = (income - (housing + util + health + gas + groceries)).sum()
+    post_necessities_pct = (left_over_income.sum() / income.sum()) * 100 ##########
+    income_to_necessities_ratio = (income.sum() / (housing + util + health + gas + groceries).sum()) #########
+    total_months = df[df['series'] == INCOME_SEREIS_ID].reset_index()['date'].nunique() or 12
+    travel = (raw_travel.sum() / 12) * total_months
+    avg_health_spend = health.sum() / total_months ##################
+    avg_gas_spend = gas.sum() / total_months  ##################
     travel_left_over_pct = travel / left_over_income if left_over_income > 0 else 0
+
+    # Compute MoM
+    neccessities_pct_avg_growth = ((housing + util + health + gas + groceries) / income).resample('MS').sum().pct_change().mean() * 100
+    post_necessities_pct_avg_growth = (left_over_income / income).resample('MS').sum().pct_change().mean() * 100
+    income_to_necessities_ratio_avg_growth = (income / (housing + util + health + gas + groceries)).resample('MS').sum().pct_change().mean() * 100
+    health_spend_avg_growth = health.resample('MS').sum().pct_change().mean() * 100
+    gas_spend_avg_growth = gas.resample('MS').sum().pct_change().mean() * 100
+    travel_spend_spend_avg_growth = raw_travel.resample('MS').sum().pct_change().mean() * 100
+
+
 
     metrics = {
         "neccessities_pct": neccessities_pct,
-        "left_over_income": left_over_income,
         "post_necessities_pct": post_necessities_pct,
         "income_to_necessities_ratio": income_to_necessities_ratio,
         "average_monthly_health_spend": avg_health_spend,
         "average_monthly_gas_spend": avg_gas_spend,
-        "travel_to_left_over_pct": travel_left_over_pct,
-        "travel_yoy_change": travel_yoy_change
+        "travel_yoy_change": travel_yoy_change,
+        "neccessities_pct_avg_growth": neccessities_pct_avg_growth,
+        "post_necessities_pct_avg_growth": post_necessities_pct_avg_growth,
+        "income_to_necessities_ratio_avg_growth": income_to_necessities_ratio_avg_growth,
+        "health_spend_avg_growth": health_spend_avg_growth,
+        "gas_spend_avg_growth": gas_spend_avg_growth,
+        "travel_spend_spend_avg_growth": travel_spend_spend_avg_growth
     }
 
     return metrics

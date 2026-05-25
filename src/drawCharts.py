@@ -89,7 +89,7 @@ def draw_donut_chart(df):
 
     st.plotly_chart(fig, use_container_width=True)
 
-def draw_ticker_card(time_frame, label: str, absolute_val_str: str, pct_change: float,):
+def draw_ticker_card(time_frame, prefix_label_format, postfix_label_format, label, absolute_val_str, pct_change):
     # 1. Handle background colors and icons for the trend badge
         badge_html = ""
         if pct_change is not None:
@@ -117,7 +117,7 @@ def draw_ticker_card(time_frame, label: str, absolute_val_str: str, pct_change: 
                     align-items: center;
                     gap: 4px;
                     line-height: 1;">
-                    <span>{icon}</span> <span>{sign}{pct_change:.1f}%</span>
+                    <span>{icon}</span> <span>{sign}{pct_change:.2f}%</span>
                 </span>
             </div>
             """
@@ -139,7 +139,7 @@ def draw_ticker_card(time_frame, label: str, absolute_val_str: str, pct_change: 
             </div>
 
             <div style="font-size: 28px; font-weight: 700; color: #FFFFFF; line-height: 1.2;">
-               $ {absolute_val_str:.2f} B
+               {prefix_label_format} {absolute_val_str} {postfix_label_format}
             </div>
 
             {badge_html}
@@ -335,47 +335,3 @@ def draw_category_spend_trend(df, pill_filter):
     ).properties(title="Yearly Inflation Rate")
 
     st.altair_chart(chart, use_container_width=True)
-
-
-# def draw_category_spend_trend(df, pill_filter):
-
-#     pills = {
-#         'Income': INCOME_SEREIS_ID,
-#         'Housing': 'HOUSING',
-#         'Utilities': UTILITY_SEREIES_ID,
-#         'Health Care': HEALTH_SERIES_ID,
-#         'Gas': GAS_SERIES_ID,
-#         'Groceries': GROCERIES_SERIES_ID,
-#         'Vaction': TRAVEL_SERIES_ID
-#         }
-
-#     selected_pills = [pills[p] for p in pill_filter if p in pills.keys()]
-#     selected_pills.append('PI') # Always add income back for line hraph
-
-#     chart_df = df.rename(columns={'converted_value': 'Amount'}).copy()
-#     chart_df = chart_df[chart_df.series.isin(selected_pills)]
-
-#     # Convert title
-#     chart_df['Category'] = chart_df['title'].apply(lambda x: TITLE_NAME_HOVER[x])
-#     chart_df = chart_df.groupby(['Category', 'year'])['Amount'].sum().reset_index()
-
-#     chart = alt.Chart(chart_df).mark_line().encode(
-#         x=alt.X('year', title=None, axis=alt.Axis(format='d')),
-#         y=alt.Y('Amount:Q'),
-#         color=alt.Color('Category', legend=None,
-#             scale=alt.Scale(
-#                             domain=list(MASTER_PALETTE.keys()),
-#                             range=list(MASTER_PALETTE.values())
-#                         )),
-#         tooltip=[
-#                 alt.Tooltip('Category:N', title='title'),
-#                 alt.Tooltip('Amount:Q', title='Amount', format='.2')
-#             ],
-#         # Reduce Opacity
-#         opacity=alt.condition(
-#                 "datum.Category == 'Income'",
-#                 alt.value(1.0),
-#                 alt.value(0.30))
-#     ).properties(title="Spend Trend")
-
-#     st.altair_chart(chart, use_container_width=True)
