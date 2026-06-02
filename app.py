@@ -29,7 +29,7 @@ default_df = collect_single_year_data()
 ###################################
 
 # Set side bar
-st.sidebar.title("Federal Resever Economic Discovery Analysis")
+st.sidebar.title("Federal Reserve Economic Discovery Analysis")
 st.markdown(
     """
     <style>
@@ -69,7 +69,6 @@ col4, col5, col6 = st.columns(3)
 with col1:
     with st.container(border=True):
         if view == 'Monthly:':
-            # st.metric(label='Necessity Usage', value=f"{metrics['neccessities_pct']:.0f}%")
             draw_ticker_card(
                     time_frame='Year',
                     label="Necessity Usage",
@@ -93,7 +92,6 @@ with col1:
 with col2:
     with st.container(border=True):
         if view == 'Monthly:':
-            # st.metric(label='Left Over Income Percentage', value=f"{metrics['post_necessities_pct']:.0f}%")
             draw_ticker_card(
                     time_frame='Year',
                     label="Left Over Income Percentage",
@@ -117,7 +115,6 @@ with col2:
 with col3:
     with st.container(border=True):
         if view == 'Monthly:':
-            # st.metric(label='Income to Necessities Ratio', value=f"{metrics['income_to_necessities_ratio']:.2f}")
             draw_ticker_card(
                     time_frame='Year',
                     label="Income to Necessities Ratio",
@@ -141,7 +138,6 @@ with col3:
 with col4:
     with st.container(border=True):
         if view == 'Monthly:':
-            # st.metric(label='Monthly Average Health Spend', value=f"${metrics['average_monthly_health_spend']:.2f} B")
             draw_ticker_card(
                     time_frame='Year',
                     label="Monthly Average Health Spend",
@@ -165,7 +161,6 @@ with col4:
 with col5:
     with st.container(border=True):
         if view == 'Monthly:':
-            # st.metric(label='Monthly Average gas Spend', value=f"${metrics['average_monthly_gas_spend']:.2f} B")
             draw_ticker_card(
                     time_frame='Year',
                     label="Monthly Average gas Spend",
@@ -189,11 +184,10 @@ with col5:
 with col6:
     with st.container(border=True):
         if view == 'Monthly:':
-            # st.metric(label='Foreign Travel Spend Growth', value=f"{metrics['travel_yoy_change']:.0f}%")
             draw_ticker_card(
                     time_frame='Year',
                     label="Foreign Travel Spend Growth",
-                    sub_label="Average MoM Change",
+                    sub_label="Change From Previous Year",
                     pct_change=metrics['travel_spend_spend_avg_growth'],
                     prefix_val_format=' ',
                     postfix_val_format=' %',
@@ -229,7 +223,7 @@ with col8:
 with st.container(border=True):
 
     # Set categories
-    categories = ['Income', 'Housing', 'Utilities', 'Health Care', 'Gas', 'Groceries', 'Vaction']
+    categories = ['Income', 'Housing', 'Utilities', 'Health Care', 'Gas', 'Groceries', 'Vacation']
 
     # Apply filter and set chart
     active_filters = st.session_state.get('pill_choice', categories)
@@ -245,8 +239,8 @@ with st.container(border=True):
         # Show filter sleection
         pill_selection = st.pills(
             label='Filter by Category',
-            options=['Housing', 'Utilities', 'Health Care', 'Gas', 'Groceries', 'Vaction'],
-            default=['Housing', 'Utilities', 'Health Care', 'Gas', 'Groceries','Vaction'],
+            options=['Housing', 'Utilities', 'Health Care', 'Gas', 'Groceries', 'Vacation'],
+            default=['Housing', 'Utilities', 'Health Care', 'Gas', 'Groceries','Vacation'],
             selection_mode='multi',
             label_visibility='collapsed',
             key='pill_choice')

@@ -3,19 +3,19 @@ import pandas as pd
 import altair as alt
 import streamlit as st
 import plotly.express as px
+from streamlit_echarts import st_echarts
 from dataFetch import (INCOME_SEREIS_ID, COMBINED_GAS_AND_UTIL, UTILITY_SEREIES_ID, HEALTH_SERIES_ID,
     GAS_SERIES_ID, GROCERIES_SERIES_ID, TRAVEL_SERIES_ID)
 
-# Set Master Pallette for charts categories
 MASTER_PALETTE = {
-    'Income': '#4A90E2',
-    'Housing': '#F5A623',
-    'Utilities': '#7ED321',
-    'Health Care': '#9013FE',
-    'Gas': '#E67E22',
-    'Groceries': '#D0021B',
-    'Vacation': '#00A896',
-    'Left Over Income': '#4A90E2'
+    'Income': '#115f9a',         # Deep Corporate Blue
+    'Housing': '#1984c5',        # Slate Blue
+    'Utilities': '#22a7f0',      # Electric Sky Blue
+    'Health Care': '#ff8a5c',    # Soft Coral/Salmon (The circuit breaker for crossing lines!)
+    'Gas': '#48b5c4',            # Crisp Deep Teal
+    'Groceries': '#76c68f',      # Sage Green
+    'Vacation': '#a6d75b',       # Bright Lime Green
+    'Left Over Income': '#115f9a'
 }
 
 # Title mappinig for tool tips
@@ -28,7 +28,8 @@ TITLE_NAME_HOVER = {
     'Personal consumption expenditures: Food': 'Groceries',
     'Personal consumption expenditures: Foreign travel by U.S. residents': 'Vacation',
     'Left Over Income': 'Left Over Income'
-    }
+}
+
 
 def draw_donut_chart(df):
 
@@ -67,12 +68,15 @@ def draw_donut_chart(df):
             showlegend=False,
             margin=dict(t=20, b=40, l=30, r=30),
             height=350,
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font_color='#ffffff',
             title_text="Income Distribution",
             title_xanchor='left',
             title_yanchor='top',
             annotations=[
                         {
-                            "text": f"Total Breakdown<br><b>${donut_df['Amount'].sum() :.1f}B</b>",
+                            "text": f"Total Breakdown<br><b>${inc_val:.2f} B</b>",
                             "x": 0.5,
                             "y": 0.5,
                             "font_size": 20,
@@ -124,16 +128,21 @@ def draw_ticker_card(time_frame, prefix_val_format, postfix_val_format, label, s
                 <span style="color: #525866; font-size: 14px;">{sub_label}</span>
             </div>
             """
+        else:
+            badge_html = '<div style="height: 23px; margin-top: 6px;"></div>'
 
         # 2. Complete structural card wrapper
         card_html = f"""
         <div style="
+            background-color: #161b22;
             padding: 20px;
             text-align: center;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
             min-height: 140px;
             display: flex;
+            height: 165px;
+            box-sizing: border-box;
             flex-direction: column;
             justify-content: center;">
 
@@ -248,6 +257,115 @@ def draw_bar_chart_yearly(df):
     st.altair_chart(chart, use_container_width=True)
 
 
+# def draw_ToT_line_chart(df, pill_filter):
+
+#     pills = {
+#         'Income': INCOME_SEREIS_ID,
+#         'Housing': 'HOUSING',
+#         'Utilities': UTILITY_SEREIES_ID,
+#         'Health Care': HEALTH_SERIES_ID,
+#         'Gas': GAS_SERIES_ID,
+#         'Groceries': GROCERIES_SERIES_ID,
+#         'Vacation': TRAVEL_SERIES_ID
+#     }
+
+#     selected_pills = [pills[p] for p in pill_filter if p in pills.keys()]
+
+#     if 'PI' not in selected_pills:
+#         selected_pills.append('PI')
+
+#     chart_df = df.rename(columns={'pct_change': 'MoM Rate'}).copy()
+#     chart_df = chart_df[chart_df.series.isin(selected_pills)]
+#     chart_df = chart_df[chart_df['MoM Rate'].notna()]
+
+#     chart_df['Category'] = chart_df['title'].apply(lambda x: TITLE_NAME_HOVER[x])
+#     chart_df = chart_df.sort_values('date')
+
+#     x_data = chart_df['date'].dt.strftime('%b %d').unique().tolist()
+
+#     active_categories = chart_df['Category'].unique().tolist()
+
+#     fallback_colors = ['#115f9a', '#1984c5', '#22a7f0', '#48b5c4', '#76c68f', '#a6d75b', '#d8f3dc']
+#     chart_colors = [MASTER_PALETTE.get(cat, fallback_colors[i % len(fallback_colors)]) for i, cat in enumerate(active_categories)]
+
+#     series_list = []
+#     for category in active_categories:
+#         category_df = chart_df[chart_df['Category'] == category]
+#         y_data = (category_df['MoM Rate'] * 100).tolist()
+
+#         line_opacity = 1.0 if category == 'Income' else 0.35
+#         area_opacity = 0.08 if category == 'Income' else 0.02
+
+#         series_list.append({
+#             "name": category,
+#             "type": "line",
+#             "smooth": False,
+#             "symbol": "circle",
+#             "symbolSize": 6,
+#             "showSymbol": False,
+#             "lineStyle": {
+#                 "width": 3 if category == 'Income' else 2,
+#                 "opacity": line_opacity
+#             },
+#             "areaStyle": {
+#                 "opacity": area_opacity
+#             },
+#             "data": y_data
+#         })
+
+#     options = {
+#         "title": {
+#             "text": "Monthly Inflation Rate",
+#             "textStyle": {"color": "#FFFFFF", "fontSize": 14, "fontWeight": 600},
+#             "left": "0%"
+#         },
+#         "color": chart_colors,
+#         "backgroundColor": "transparent",
+#         "tooltip": {
+#             "trigger": "axis",
+
+#             "className": "echarts-tooltip-dark",
+#             "axisPointer": {
+#                 "type": "line",
+#                 "lineStyle": {"color": "#525866", "type": "dashed", "width": 1},
+#                 "handle": {"show": False}
+#             },
+#             "backgroundColor": "#161b22",
+#             "borderColor": "#21262d",
+#             "borderWidth": 1,
+#             "textStyle": {"color": "#FFFFFF", "fontFamily": "sans-serif"},
+#             "valueFormatter": "{value:.2f}%"
+#         },
+#         "grid": {
+#             "left": "4%",
+#             "right": "4%",
+#             "bottom": "15%",
+#             "containLabel": True
+#         },
+#         "xAxis": {
+#             "type": "category",
+#             "boundaryGap": False,
+#             "data": x_data,
+#             "axisLabel": {"color": "#808495", "fontSize": 11},
+#             "axisLine": {"lineStyle": {"color": "#21262d"}},
+#             "triggerEvent": True
+#         },
+#         "yAxis": {
+#             "type": "value",
+#             "axisLabel": {
+#                 "color": "#808495",
+#                 "fontSize": 11,
+#                 "formatter": "{value}%"
+#             },
+#             "splitLine": {"lineStyle": {"color": "#21262d", "type": "solid"}},
+#             "axisLine": {"show": False}
+#         },
+#         "series": series_list
+#     }
+
+#     return st_echarts(options=options, height="380px")
+
+
 def draw_ToT_line_chart(df, pill_filter):
 
     pills = {
@@ -257,7 +375,7 @@ def draw_ToT_line_chart(df, pill_filter):
         'Health Care': HEALTH_SERIES_ID,
         'Gas': GAS_SERIES_ID,
         'Groceries': GROCERIES_SERIES_ID,
-        'Vaction': TRAVEL_SERIES_ID
+        'Vacation': TRAVEL_SERIES_ID
         }
 
     selected_pills = [pills[p] for p in pill_filter if p in pills.keys()]
@@ -301,7 +419,7 @@ def draw_category_spend_trend(df, pill_filter):
         'Health Care': HEALTH_SERIES_ID,
         'Gas': GAS_SERIES_ID,
         'Groceries': GROCERIES_SERIES_ID,
-        'Vaction': TRAVEL_SERIES_ID
+        'Vacation': TRAVEL_SERIES_ID
         }
 
     selected_pills = [pills[p] for p in pill_filter if p in pills.keys()]

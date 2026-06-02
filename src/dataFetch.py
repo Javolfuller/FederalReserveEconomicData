@@ -3,6 +3,7 @@ import requests
 import numpy as np
 import pandas as pd
 import configparser
+from time import sleep
 import streamlit as st
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
@@ -118,7 +119,13 @@ def get_request (end_point, end_point_id, observation_start=None, observation_en
             # Fill any NaN values with yearly average
             observation_df['converted_value'] = observation_df['converted_value'].fillna(observation_df.groupby('year')['converted_value'].transform('mean'))
 
+            sleep(5)
+
             return meta_df, observation_df
+
+        sleep(5)
+
+    sleep(5)
 
 def get_single_year_metrics (df):
 
