@@ -2,3 +2,4 @@ streamlit
 altair
 pandas
 plotly
+streamlit_echarts
