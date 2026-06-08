@@ -69,6 +69,7 @@ def get_request (end_point, end_point_id, observation_start=None, observation_en
     meta_response = requests.get(base_url, params=meta_params)
 
     if meta_response.ok:
+        sleep(3)
         meta_data = meta_response.json()
         meta_data = meta_data.get(end_point+"s", [])
 
@@ -223,7 +224,7 @@ def get_multi_year_metrics (df):
     return metrics
 
 
-@st.cache_data
+@st.cache_data(ttl=86400, show_spinner="Fetching fresh economic data from FRED...")
 def collect_single_year_data():
     # Data collection
     pincome_meta_df, pincome_observation_df = get_request('series', INCOME_SEREIS_ID)
